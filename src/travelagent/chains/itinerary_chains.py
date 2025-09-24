@@ -3,12 +3,19 @@ from langchain_core.prompts import ChatPromptTemplate
 from src.travelagent.config.config import GROQ_API_KEY
 from src.travelagent.logging import logger
 from src.travelagent.exception import ChatbotException
+import os,sys
 
-llm = ChatGroq(
-    groq_api_key = GROQ_API_KEY,
-    model_name = "llama-3.3-70b-versatile",
-    temperature = 0.7
-)
+try:
+    logger.info("Creating an LLM")
+    llm = ChatGroq(
+        groq_api_key = GROQ_API_KEY,
+        model_name = "llama-3.3-70b-versatile",
+        temperature = 0.7
+    )
+    logger.info("LLM created Successfully")
+except Exception as e:
+    logger.error(e)
+    raise ChatbotException(e,sys)
 
 itinerary_prompt = ChatPromptTemplate([
     ("system","""You are an expert AI Travel Agent specializing in creating customized travel itineraries. Your task is to generate a detailed, budget-friendly day-by-day travel plan based on the input: {city}, {number_of_days}, and key places or interests: {interest}.For each itinerary, follow these rules: 
@@ -25,9 +32,16 @@ itinerary_prompt = ChatPromptTemplate([
 ])
 
 def generate_itinerary(city:str , interests:list[str], num_of_days:int) -> str:
-    response = llm.invoke(
-        itinerary_prompt.format_messages(city=city,number_of_days = num_of_days, interest=', '.join(interests))
-    )
+    try:
+        logger.info("Invoking the LLM with the custom prompt")
+        response = llm.invoke(
+            itinerary_prompt.format_messages(city=city,number_of_days = num_of_days, interest=', '.join(interests))
+        )
+        
+        logger.info("Returning the generated content")
+        return response.content
     
-    return response.content
+    except Exception as e:
+        logger.error(e)
+        raise ChatbotException(e,sys)
 
