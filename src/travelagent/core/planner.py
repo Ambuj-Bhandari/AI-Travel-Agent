@@ -35,7 +35,7 @@ class TravelPlanner:
     def set_numOfDays(self,num_of_days:int):
         try:
             self.num_of_days = int(num_of_days)
-            self.messages.append(HumanMessage(content=num_of_days))
+            self.messages.append(HumanMessage(content=str(num_of_days)))
             logger.info("Number of Days Set Successfully!!")
         except Exception as e:
             logger.error(e)
